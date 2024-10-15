@@ -200,7 +200,7 @@ def update_email():
     return jsonify(response.json()), 200
 
 def convert_due_on(todo):
-    return datetime.fromisoformat(todo['due_on'].replace('Z', '+00:00'))
+    return datetime.fromisoformat(todo['due_on'])
 
 #sort todos
 @app.route('/getTodosSorted', methods=['GET'])

@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 import requests
@@ -50,21 +51,66 @@ def create_user():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
+
+    count_before = get_user_count()
+    initial_response = requests.get(f"{BASE_URL}/users", verify=False)
+    users = initial_response.json()
+    initial_ids = [user['id'] for user in users]
+
+    print(initial_ids)
     user_data=request.json
     response = requests.post(f"{BASE_URL}/users",headers=headers, json=user_data,verify=False)
-    return jsonify(response.json())
-    # if response.status_code==200:
-    #     return jsonify(response.json()),200
+
+
+    time.sleep(10)
+    updated_response = requests.get(f"{BASE_URL}/users", verify=False)
+    updated_users = updated_response.json()
+    updated_ids = [user['id'] for user in updated_users]
+    print(updated_ids)
+
+    new_ids = set(updated_ids) - set(initial_ids)
+    print(new_ids)
+
+    return jsonify({
+        "message": "user created",
+        "new_user_ids": list(new_ids),
+        "user_data": response.json()
+    })
+    # count_after=get_user_count()
+    # return jsonify({
+    #         "message": "User created successfully",
+    #         "total_users_before": count_before,
+    #         "total_users_after": count_after,
+    #         "user_data": response.json()
+    # })
+    # 7474125
+
+    # user_data = request.json
+    # response = requests.post(f"{BASE_URL}/users", headers=headers, json=user_data, verify=False)
+    #
+    # return jsonify(response.json())
 
 
 
 #get count of all users
 def get_user_count():
-    response = requests.get(f"{BASE_URL}/users", verify=False)
-    if response.status_code == 200:
-        return len(response.json())
-    else:
-        return 0
+    unique_ids = set()
+    page = 1
+    while True:
+        response = requests.get(f"{BASE_URL}/users?page={page}&per_page=100", verify=False)
+        # if response.status_code != 200:
+        #
+        #     print(f"Error: {response.status_code}")
+        #     break
+        users = response.json()
+        if not users:
+            break
+        for todo in users:
+            unique_ids.add(todo['id'])
+        page += 1
+    total_unique_todos = len(unique_ids)
+    return total_unique_todos
+
 
 @app.route('/userCount', methods=['GET'])
 def user_count():
@@ -212,6 +258,8 @@ def get_sort_todos():
 
         sorted_todos = sorted(todos20, key=convert_due_on)
         return jsonify(sorted_todos)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)

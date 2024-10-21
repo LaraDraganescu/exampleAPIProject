@@ -10,12 +10,33 @@ def run(playwright: Playwright):
     grup_elemente=page.locator("xpath=.//div[@class='element-group' and .//div[@class='header-text' and contains(text(), 'Elements')]]")
     grup_elemente.locator("xpath=.//span[contains(text(),'Buttons')]").click()
 
-    # page.locator("#doubleClickBtn").dblclick()
-    page.get_by_text("Double Click Me").dblclick()
+
+    double_click_text="You have done a double click"
+    right_click_text="You have done a right click"
+    click_text="You have done a dynamic click"
+
+
+    page.locator("#doubleClickBtn").dblclick()
+    double_button = page.locator('#doubleClickMessage').inner_text()
+    if double_button==double_click_text:
+        print("message double click")
+    else:
+        print("message does not appear")
+
     page.get_by_text("Right Click Me").click(button="right")
-    # page.get_by_role("button", name="Click Me").click()
-    # page.click(".//button[text()='Click Me']")
-    page.locator("xpath=.//button[text()='Click Me']").click()
+    right_button=page.locator('#rightClickMessage').inner_text()
+    if right_button==right_click_text:
+        print("message right click")
+    else:
+        print("message does not appear")
+
+    page.get_by_text("Click Me", exact=True).click()
+    click_button=page.locator('#dynamicClickMessage').inner_text()
+    if click_button==click_text:
+        print("message dynamic click")
+    else:
+        print("message does not appear")
+
     browser.close()
 
 with sync_playwright() as playwright:

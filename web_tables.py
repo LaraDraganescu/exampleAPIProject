@@ -34,23 +34,24 @@ def search(page, term):
 
 def extract_table_data(page):
     table_data = []
-    row_count = page.locator(".rt-tr-group").count()
+    rows = page.locator("xpath=.//div[@class='rt-tr-group']")
+    row_count = rows.count()
 
-    for row_index in range(1, row_count + 1):
-        row = page.locator(f".rt-tr-group:nth-child({row_index})")
-
+    for row_index in range(row_count):
+        row = rows.nth(row_index)
         row_data = {
-            "firstName": row.locator(".rt-td:nth-child(1)").inner_text(),
-            "lastName": row.locator(".rt-td:nth-child(2)").inner_text(),
-            "age": row.locator(".rt-td:nth-child(3)").inner_text(),
-            "userEmail": row.locator(".rt-td:nth-child(4)").inner_text(),
-            "salary": row.locator(".rt-td:nth-child(5)").inner_text(),
-            "department": row.locator(".rt-td:nth-child(6)").inner_text(),
+            "firstName": row.locator("xpath=.//div[@class='rt-td'][1]").inner_text(),
+            "lastName": row.locator("xpath=.//div[@class='rt-td'][2]").inner_text(),
+            "age": row.locator("xpath=.//div[@class='rt-td'][3]").inner_text(),
+            "userEmail": row.locator("xpath=.//div[@class='rt-td'][4]").inner_text(),
+            "salary": row.locator("xpath=.//div[@class='rt-td'][5]").inner_text(),
+            "department": row.locator("xpath=.//div[@class='rt-td'][6]").inner_text(),
         }
-
         table_data.append(row_data)
 
     return table_data
+
+
 
 
 def verify_row(table_data, expected_data):
@@ -84,6 +85,17 @@ def verify_row(table_data, expected_data):
 #     print("match" if changed_department == expected_data["department"] else "don't match")
 
 
+def check(page, data):
+    table_data=extract_table_data(page)
+    verify_row(table_data,data)
+
+def verify_deletion(page,field, value):
+    table_data=extract_table_data(page)
+    for row in table_data:
+        if row[field] ==value:
+            return False
+    return True
+
 def run(playwright: Playwright):
     chromium = playwright.chromium # or "firefox" or "webkit".
     browser = chromium.launch(headless=False)
@@ -108,8 +120,7 @@ def run(playwright: Playwright):
     }
 
     add_record(page, registration_data)
-    table_data = extract_table_data(page)
-    verify_row(table_data,registration_data)
+    check(page,registration_data)
 
 
     edit_data = {
@@ -122,13 +133,13 @@ def run(playwright: Playwright):
     }
 
     edit_record(page, "Vega", edit_data)
-    table_data2 = extract_table_data(page)
-    verify_row(table_data2, edit_data)
-
+    check(page,edit_data)
 
     delete_record(page, "kierra@example.com")
-    tabel_data6=extract_table_data(page)
-    # verify_row(tabel_data6, edit_data)
+    if verify_deletion(page, "userEmail", "kierra@example.com"):
+        print("deleted")
+    else:
+        print("still exists")
 
     search(page, "it")
     tabel_data4=extract_table_data(page)

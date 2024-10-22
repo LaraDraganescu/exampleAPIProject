@@ -28,10 +28,25 @@ def run(playwright: Playwright):
     current_address = page.locator('p#currentAddress').inner_text().replace("Current Address :", "").strip()
     permanent_address = page.locator('p#permanentAddress').inner_text().replace("Permananet Address :", "").strip()
 
-    print("match" if name==data['userName'] else "don't match")
-    print("match" if email==data['userEmail'] else "don't match")
-    print("match" if current_address==data['currentAddress'] else "don't match")
-    print("match" if permanent_address==data['permanentAddress'] else "don't match")
+    if name==data['userName']:
+        print("match")
+    else:
+        print("don't match")
+
+    if email == data['userEmail']:
+        print("match")
+    else:
+        print("don't match")
+
+    if current_address == data['currentAddress']:
+        print("match")
+    else:
+        print("don't match")
+
+    if permanent_address == data['permanentAddress']:
+        print("match")
+    else:
+        print("don't match")
 
     browser.close()
 with sync_playwright() as playwright:

@@ -47,13 +47,27 @@ def fill_form(page, data):
                 print("mobile corect")
             else:
                 print("mobile not correct")
-        # if 'Birth' in label:
-        #     page.locator("#dateOfBirthInput").fill(data['DateofBirth'])
-            # page.locator("body").click()
-        # if 'Subjects' in label:
-        #     subject=data['Subjects']
-        #     page.locator("#subjectsInput").fill(data['Subjects'])
-        #     page.locator(f"xpath=.//div[contains(text(), '{subject}')]").click()
+        if 'Birth' in label:
+            page.locator("#dateOfBirthInput").fill(data['DateofBirth'])
+            page.locator("#dateOfBirthInput").press("Enter")
+        if 'Subjects' in label:
+            for sub in data['Subjects']:
+                page.locator("#subjectsInput").fill(sub)
+                page.locator("#subjectsInput").press("Enter")
+
+                subj_filled=page.locator("xpath=.//div[@class='css-1rhbuit-multiValue subjects-auto-complete__multi-value']").all_inner_texts()
+                if sub in subj_filled:
+                    print("subject added")
+                else:
+                    print("not added")
+            # page.locator(f"xpath=.//div[contains(text(), '{subject}')]").click()
+
+        if 'Picture' in label:
+            picture=data['Picture']
+            with page.expect_file_chooser() as fc_info:
+                page.get_by_text("Select picture").click()
+            file_chooser = fc_info.value
+            file_chooser.set_files(picture)
         if 'Hobbies' in label:
            for hobby in data['Hobbies']:
                 hobby_check=page.locator(f"xpath=.//label[text()='{hobby}']")
@@ -94,7 +108,10 @@ def fill_form(page, data):
             city_button.click()
             page.locator(f"xpath=.//div[contains(text(), '{city}')]").click()
 
+    page.wait_for_timeout(5000)
     page.locator("#submit").click()
+
+
 
 def extract_table_data(page):
     extracted_data = {}
@@ -128,13 +145,15 @@ def run(playwright: Playwright):
         "Gender":"Other",
         "Mobile":"1234567899",
         "DateofBirth":"10 Oct 1998",
-        "Subjects":"Physics",
+        "Subjects":["Physics","English"],
+        "Picture":"/Users/ldragane/Desktop/pic.png",
         "Hobbies":["Music","Sports"],
         "CurrentAddress":"US",
         "StateandCity":["NCR","Delhi"]
     }
 
     fill_form(page,data)
+    page.wait_for_selector(".modal-content", timeout=5000)
     table_data=extract_table_data(page)
 
     expected_data= {
@@ -143,7 +162,7 @@ def run(playwright: Playwright):
         "Gender": data["Gender"],
         "Mobile": data["Mobile"],
         "Date of Birth": data["DateofBirth"],
-        "Subjects": data["Subjects"],
+        "Subjects": ", ".join(data["Subjects"]),
         "Hobbies": ", ".join(data["Hobbies"]),
         "Address": data["CurrentAddress"],
         "State and City": " ".join(data["StateandCity"])

@@ -128,6 +128,7 @@ def fill_form(page, data):
                     input_element.fill(key[index])
                 else:
                     input_element.fill(key)
+
                 entered_value = input_element.input_value()
                 if isinstance(key, list):
                     expected_value = key[index]
@@ -139,10 +140,10 @@ def fill_form(page, data):
                     print("not correct")
 
             elif input_type=="radio":
-                input_element.check()
+                radio_element=wrapper.locator(f"xpath=.//label[contains(text(), '{key}')]")
+                radio_element.check()
 
-
-                if input_element.is_checked():
+                if radio_element.is_checked():
                     print(" is checked")
                 else:
                     print("not checked")
@@ -154,9 +155,6 @@ def fill_form(page, data):
             #     file_chooser.set_files(key)
 
             elif input_type=="checkbox":
-                # input_element.click()
-                # checkbox_label = input_element.locator(f"//label[contains(text(), '{key[index]}')]")
-                # input_element.check()
                 for value in key:
                     checkbox_label = wrapper.locator(f"xpath=.//label[contains(text(), '{value}')]")
                     checkbox_label.check()
